@@ -125,6 +125,8 @@ BackgroundMCCCollision::BackgroundMCCCollision (std::string const& collision_nam
 
             std::string secondary_species;
             std::string source_species;
+            pp_collision_name.get("ionization_species", secondary_species);
+            m_species_names.push_back(secondary_species);
             pp_collision_name.get("electron_species", secondary_species);
             m_species_names.push_back(secondary_species);
 
@@ -214,7 +216,10 @@ BackgroundMCCCollision::doCollisions (amrex::Real cur_time, amrex::Real dt, Mult
     WARPX_PROFILE("BackgroundMCCCollision::doCollisions()");
     using namespace amrex::literals;
 
-    auto& species1 = mypc->GetParticleContainerFromName(m_species_names[0]); //secondary (for ionization)
+    auto& species1 = mypc->GetParticleContainerFromName(m_species_names[0]);
+    // this is a very ugly hack to have species2 and species3 be a reference and be
+    // defined in the scope of doCollisions
+    // species2: ion species
     auto& species2 = (
                       (m_species_names.size() > 1) ?
                       mypc->GetParticleContainerFromName(m_species_names[1]) :
