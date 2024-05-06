@@ -235,7 +235,6 @@ BackgroundMCCCollision::doCollisions (amrex::Real cur_time, amrex::Real dt, Mult
 
     if (!init_flag) {
         m_mass1 = species1.getMass(); //secondary
-        m_mass2 = species2.getMass(); //source
 
         // calculate maximum collision frequency without ionization
         m_nu_max = get_nu_max(m_scattering_processes);
@@ -401,7 +400,7 @@ void BackgroundMCCCollision::doBackgroundCollisionsWithinTile
                               v_coll = std::sqrt(v_coll2);
 
                               // calculate the collision energy in eV
-                              ParticleUtils::getCollisionEnergy(v_coll2, m, M, gamma, E_coll); // CHECK THIS
+                              ParticleUtils::getCollisionEnergy(v_coll2, m, M, gamma, E_coll); 
 
                               // loop through all collision pathways
                               for (int i = 0; i < process_count; i++) {
@@ -436,7 +435,7 @@ void BackgroundMCCCollision::doBackgroundCollisionsWithinTile
 
                                   // subtract any energy penalty of the collision from the
                                   // projectile energy
-// here                                  if (scattering_process.m_energy_penalty > 0.0_prt) {
+                                  if (scattering_process.m_energy_penalty > 0.0_prt) {
                                       ParticleUtils::getEnergy(v_coll2, m, E_coll);
                                       E_coll = (E_coll - scattering_process.m_energy_penalty) * PhysConst::q_e;
                                       const auto scale_fac = static_cast<amrex::ParticleReal>(
@@ -490,7 +489,7 @@ void BackgroundMCCCollision::doBackgroundIonization
     // m_mass1: mass of the incident species
     const auto Filter = ImpactIonizationFilterFunc(
                                                    m_ionization_processes[0],
-                                                   m_mass1, m_mass2, m_total_collision_prob_ioniz,
+                                                   m_mass1, m_total_collision_prob_ioniz,
                                                    m_nu_max_ioniz, m_background_density_func, t
                                                    );
 
@@ -526,8 +525,7 @@ void BackgroundMCCCollision::doBackgroundIonization
 
         // still need to get an elec_tile for the electrons? not sure where they get the elec tile...
         setNewParticleIDs(elec_tile, np_elec, num_added);
-        setNewParticleIDs(secondary_tile, np_secondary, num_added);
-        setNewParticleIDs(source_tile, np_source, num_added);
+        setNewParticleIDs(ion_tile, np_ion, num_added);
 
         if (cost && WarpX::load_balance_costs_update_algo == LoadBalanceCostsUpdateAlgo::Timers)
         {
