@@ -111,6 +111,8 @@
 #include <vector>
 #include <sstream>
 
+#include <iostream>
+
 using namespace amrex;
 
 namespace
@@ -252,7 +254,6 @@ PhysicalParticleContainer::PhysicalParticleContainer (AmrCore* amr_core, int isp
     BackwardCompatibility();
 
     const ParmParse pp_species_name(species_name);
-
     std::string injection_style = "none";
     pp_species_name.query("injection_style", injection_style);
     if (injection_style != "none") {
@@ -284,6 +285,8 @@ PhysicalParticleContainer::PhysicalParticleContainer (AmrCore* amr_core, int isp
 
     std::string physical_species_s;
     const bool species_is_specified = pp_species_name.query("species_type", physical_species_s);
+    // std::cout << physical_species_s << std::endl;
+    // std::cout << species_is_specified << std::endl;
     if (species_is_specified) {
         const auto physical_species_from_string = species::from_string( physical_species_s );
         WARPX_ALWAYS_ASSERT_WITH_MESSAGE(physical_species_from_string,

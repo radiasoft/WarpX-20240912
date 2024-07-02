@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include <iostream>
+
 BackgroundMCCCollision::BackgroundMCCCollision (std::string const& collision_name)
     : CollisionBase(collision_name)
 {
@@ -94,6 +96,7 @@ BackgroundMCCCollision::BackgroundMCCCollision (std::string const& collision_nam
     // create a vector of ScatteringProcess objects from each scattering
     // process name
     for (const auto& scattering_process : scattering_process_names) {
+        std::cout << scattering_process << std::endl;
         const std::string kw_cross_section = scattering_process + "_cross_section";
         std::string cross_section_file;
         pp_collision_name.query(kw_cross_section.c_str(), cross_section_file);
@@ -124,7 +127,6 @@ BackgroundMCCCollision::BackgroundMCCCollision (std::string const& collision_nam
             ionization_flag = true;
 
             std::string secondary_species;
-            std::string source_species;
             pp_collision_name.get("ionization_species", secondary_species);
             m_species_names.push_back(secondary_species);
             pp_collision_name.get("electron_species", secondary_species);
@@ -264,10 +266,7 @@ BackgroundMCCCollision::doCollisions (amrex::Real cur_time, amrex::Real dt, Mult
 
             // if an ionization process is included the secondary species mass
             // is taken as the background mass
-            // m_background_mass = species2.getMass();
-            // Commented this out as species2 was a copy of species1 (the background/ion)
-            //    but it is now source species
-            m_background_mass = species1.getMass();
+            m_background_mass = species2.getMass();
         }
         // if no neutral species mass was specified and ionization is not
         // included assume that the collisions will be with neutrals of the
@@ -346,7 +345,7 @@ void BackgroundMCCCollision::doBackgroundCollisionsWithinTile
     auto const nu_max = m_nu_max;
 
     // store projectile and target masses
-    auto const m = m_mass1; // they say projectile, but if you track this back it is the background ion
+    auto const m = m_mass1;
     auto const M = m_background_mass;
 
     // precalculate often used value
