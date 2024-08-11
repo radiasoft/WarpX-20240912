@@ -283,9 +283,17 @@ PhysicalParticleContainer::PhysicalParticleContainer (AmrCore* amr_core, int isp
         mass_from_source |= plasma_injector->queryMass(mass);
     }
 
-    std::string physical_species_s;
-    const bool species_is_specified = pp_species_name.query("species_type", physical_species_s);
+    // This is a bad fix for our local runs: discrepancy between warpx (species_type) and 
+    // pyenv picmi (particle_type) -- not sure how to make the transition sooooo
+    // for now make sure the species_name matches the species_type we want
+    std::string physical_species_s = species_name;
+    const bool species_is_specified = 1; // pp_species_name.query("species_type", physical_species_s);
+    // const bool species_is_specified = pp_species_name.query("particle_type", physical_species_s);
+    // const bool species_is_specified_old = pp_species_name.contains("species_type");
+    // const bool species_is_specified = pp_species_name.contains("particle_type");
+    // std::cout << species_name << std::endl;
     // std::cout << physical_species_s << std::endl;
+    // std::cout << species_is_specified_old << std::endl;
     // std::cout << species_is_specified << std::endl;
     if (species_is_specified) {
         const auto physical_species_from_string = species::from_string( physical_species_s );
@@ -303,13 +311,13 @@ PhysicalParticleContainer::PhysicalParticleContainer (AmrCore* amr_core, int isp
     if (charge_is_specified && species_is_specified) {
         ablastr::warn_manager::WMRecordWarning("Species",
             "Both '" + species_name +  ".charge' and " +
-                species_name + ".species_type' are specified.\n" +
+                species_name + ".particle_type' are specified.\n" +
                 species_name + ".charge' will take precedence.\n");
     }
     if (mass_is_specified && species_is_specified) {
         ablastr::warn_manager::WMRecordWarning("Species",
             "Both '" + species_name +  ".mass' and " +
-                species_name + ".species_type' are specified.\n" +
+                species_name + ".particle_type' are specified.\n" +
                 species_name + ".mass' will take precedence.\n");
     }
 
@@ -317,7 +325,7 @@ PhysicalParticleContainer::PhysicalParticleContainer (AmrCore* amr_core, int isp
         charge_from_source ||
         charge_is_specified ||
         species_is_specified,
-        "Need to specify at least one of species_type or charge for species '" +
+        "Need to specify at least one of particle_type or charge for species '" +
         species_name + "'."
     );
 
@@ -325,7 +333,7 @@ PhysicalParticleContainer::PhysicalParticleContainer (AmrCore* amr_core, int isp
         mass_from_source ||
         mass_is_specified ||
         species_is_specified,
-        "Need to specify at least one of species_type or mass for species '" +
+        "Need to specify at least one of particle_type or mass for species '" +
         species_name + "'."
     );
 
