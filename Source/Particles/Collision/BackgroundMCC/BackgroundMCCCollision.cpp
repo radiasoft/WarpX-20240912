@@ -109,6 +109,7 @@ BackgroundMCCCollision::BackgroundMCCCollision (std::string const& collision_nam
             const std::string kw_energy = scattering_process + "_energy";
             utils::parser::getWithParser(
                 pp_collision_name, kw_energy.c_str(), energy);
+            // std::cout << scattering_process << std::endl;
         }
 
         ScatteringProcess process(scattering_process, cross_section_file, energy);
@@ -371,6 +372,9 @@ void BackgroundMCCCollision::doBackgroundCollisionsWithinTile
     amrex::ParallelForRNG(np,
                           [=] AMREX_GPU_HOST_DEVICE (long ip, amrex::RandomEngine const& engine)
                           {
+                              // std::string s1 = std::to_string(total_collision_prob);
+                              // std::cout << s1 << std::endl;
+                              
                               // determine if this particle should collide
                               if (amrex::Random(engine) > total_collision_prob) { return; }
 
@@ -417,9 +421,15 @@ void BackgroundMCCCollision::doBackgroundCollisionsWithinTile
                                   // calculate normalized collision frequency
                                   nu_i += n_a * sigma_E * v_coll / nu_max;
 
+                                  // std::cout << "looping" << std::endl;
+                                  // std::string s2 = std::to_string(nu_i);
+                                  // std::cout << s2 << std::endl;
+                                  
                                   // check if this collision should be performed
                                   if (col_select > nu_i) { continue; }
 
+                                  // std::cout << "COLL" << std::endl;
+                                  
                                   // charge exchange is implemented as a simple swap of the projectile
                                   // and target velocities which doesn't require any of the Lorentz
                                   // transformations below; note that if the projectile and target
@@ -453,11 +463,13 @@ void BackgroundMCCCollision::doBackgroundCollisionsWithinTile
                                   // transform to COM frame
                                   ParticleUtils::doLorentzTransform(vx, vy, vz, uCOM_x, uCOM_y, uCOM_z);
 
+                                  // std::cout << (scattering_process.m_type == ScatteringProcessType::ELASTIC) << std::endl;
                                   if ((scattering_process.m_type == ScatteringProcessType::ELASTIC)
                                       || (scattering_process.m_type == ScatteringProcessType::EXCITATION)) {
                                       ParticleUtils::RandomizeVelocity(
                                           vx, vy, vz, sqrt(vx*vx + vy*vy + vz*vz), engine
                                       );
+                                      // std::cout << "elastic coll occurred" << std::endl;
                                   }
                                   else if (scattering_process.m_type == ScatteringProcessType::BACK) {
                                       // elastic scattering with cos(chi) = -1 (i.e. 180 degrees)
